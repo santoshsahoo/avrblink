@@ -5,3 +5,5 @@
 /*.map
 /*.o
 /.dep
+*.sym
+*.lss

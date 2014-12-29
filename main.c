@@ -1,29 +1,29 @@
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <util/delay.h>
 
-#define MIN 10
-#define MAX 500
-
-int wait=30;
-int diff=10;
+#define WAIT 100
 
 int main(void){
+	DDRB = 0xFF;
+	PORTB = 0xF1;
     
-	DDRB = 0xff;
-	PORTB = 0;
-	while(1){
+    cli();//TIFR |= 0x01;       // clear interrupt flag
 	
-    wait+=diff;
+	
+    OCR0A  = 0x70;      // number to count up to (0x70 = 112)
+    TCCR0A = 0x02;      // Clear Timer on Compare Match (CTC) mode
+    TIMSK = 0x01;       // TC0 compare match A interrupt enable
+    TCCR0B = 0x05;      // clock source CLK/1024, start timer
     
-    if(wait>MAX)
-      diff = -10;
-    if(wait<MIN)
-      diff=10;
-	
-		PORTB = 0b00000010;
-		_delay_ms(wait);
-		PORTB = 0b00000001;
-		_delay_ms(wait);
-	}
+    sei();              // global interrupt enable
+    
+	while(1){}
+
 	return 0;
+}
+
+ISR(TIMER0_COMPA_vect)
+{
+    PORTB ^= 1<<0;
 }
